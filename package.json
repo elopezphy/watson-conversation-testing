@@ -1,0 +1,34 @@
+{
+	"name": "watson-conversation-testing",
+	"version": "0.1.0",
+	"main": "app.js",
+	"scripts": {
+		"start": "node app.js"
+	},
+	"dependencies": {
+		"express": "4.13.x",
+		"cfenv":"*",
+		"https":"*",
+		"socket.io": "*",
+		"watson-developer-cloud": "^2.4.6",
+		"csv":"*"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git://github.com/davidroldan/watson-conversation-testing.git"
+	},
+	"keywords": [
+		"watson",
+		"conversation",
+		"csv",
+		"ibm"
+	],
+	"author": "David Roldan Santos",
+	"bugs": {
+		"url": "https://github.com/davidroldan/watson-conversation-testing/issues"
+	},
+	"homepage": "https://github.com/davidroldan/watson-conversation-testing#readme",
+	"engines": {
+		"node": "7.x"
+	} 
+}

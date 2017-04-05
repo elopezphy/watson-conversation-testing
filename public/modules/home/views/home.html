@@ -1,0 +1,117 @@
+<div layout="column" layout-padding="" ng-cloak="" class="inputdemoIcons" ng-app="MyApp">
+	<md-card>
+		<md-card-content>
+			<form name="myform" ng-submit="">
+				<md-input-container class="md-icon-float md-block">
+					<label>IBM Conversation Username</label>
+					<input ng-model="credentials.username" type="text" required />
+				</md-input-container>
+
+				<md-input-container md-no-float="" class="md-block">
+					<label>IBM Conversation Password</label>
+					<input ng-model="credentials.password" type="password" required />
+				</md-input-container>
+				
+				<div class="no-padding" layout="row">
+					<md-input-container class="md-block" layout="row" flex>
+						<label>Workspace ID</label>
+						<input ng-model="credentials.workspace_id" type="text" required />
+						<div ng-show="error">
+							<div style="color:red; font-size: 12px; padding-top: 5px;">{{ error }}</div>
+						</div>
+					</md-input-container>
+					
+					<md-button ng-disabled="!(credentials.username && credentials.password) || progress" class="md-raised md-mini" style="height: 36px" ng-click="searchWorkspaces($event);">
+						<md-icon ng-show="progress != 'search workspace'" class="material-icons">&#xE8B6;</md-icon>
+						<md-progress-circular ng-show="progress == 'search workspace'" md-diameter="25px" md-mode="indeterminate" style="margin: auto; margin-top: 0px; color: grey" />				
+					</md-button>
+				</div>
+				
+				<md-checkbox ng-model="showAdvancedOptions" class="md-primary" aria-label="Show advanced options">
+					Show Advanced Options
+				</md-checkbox>
+				
+				<div ng-show="showAdvancedOptions">
+					<fieldset class="standard">
+						<legend>Advanced Options</legend>
+						<div class="no-padding" layout="row">
+							<md-input-container class="md-block" layout="row" flex>
+								<label>Initial Node</label>
+								<input ng-readonly="true" ng-model="options.initialnode" type="text" required />
+							</md-input-container>
+							
+							<md-button ng-disabled="!(credentials.username && credentials.password && credentials.workspace_id) || progress" class="md-raised md-mini" style="height: 36px" ng-click="getDialogNodes($event);">
+								<md-icon ng-show="progress != 'get dialog nodes'" class="material-icons">&#xE8B6;</md-icon>
+								<md-progress-circular ng-show="progress == 'get dialog nodes'" md-diameter="25px" md-mode="indeterminate" style="margin: auto; margin-top: 0px; color: grey" />				
+							</md-button>
+						</div>
+						
+						<md-input-container md-no-float="" class="md-block">
+							<label>Initial Context</label>
+							<textarea ng-model="options.initialcontext" ng-change="checkContext()" ng-style="contextError && {'color':'red'}" type="text"></textarea>
+							<div ng-show="contextError">
+								<div style="color:red; font-size: 12px; padding-top: 5px;">{{ contextError }}</div>
+							</div>
+						</md-input-container>
+						
+						<fieldset class="standard" layout="row">
+							<legend>Output</legend>
+							<md-checkbox ng-model="options.showIntent" class="md-primary" aria-label="Show intents">
+								Intent
+							</md-checkbox>
+							<md-checkbox ng-model="options.showConfidence" class="md-primary" aria-label="Show confidence">
+								Confidence
+							</md-checkbox>
+							<md-checkbox ng-model="options.showOutput" class="md-primary" aria-label="Show output">
+								Output
+							</md-checkbox>
+							<md-checkbox ng-model="options.showContext" class="md-primary" aria-label="Show context">
+								Context
+							</md-checkbox>
+							<div class="no-padding" layout="row" ng-repeat="item in options.context track by $index">
+								<md-input-container class="context-output-item">
+									<input type="text" ng-disabled="!options.showContext" ng-model="options.context[$index]" ng-change="onContextOutputChange()" />
+								</md-input-container>
+								<md-button ng-if="$index < options.context.length - 1" ng-disabled="progress || !options.showContext" aria-hidden="true" tabIndex="1000" class="md-icon-button launch" style="height: 36px" ng-click="clearContextItem($index)">
+									<md-icon class="material-icons">&#xE14C;</md-icon>
+								</md-button>
+							</div>
+						</fieldset>
+						
+					</fieldset>
+				</div>
+				
+				<div layout="column" layout-align="center center">
+					<div>
+						<input type="file" id="file" name="file" fileread="filename" style="margin-top: 25px;" required />
+					</div>
+					<div layout="row">
+						<div ng-show="progress != 'submit'">
+							<md-button type="submit" ng-disabled="myform.$invalid || !filename || progress || contextError" ng-click="process();" class="md-fab md-primary" aria-label="Upload">
+								<md-icon md-font-library="material-icons">&#xE2C6;</md-icon>
+							</md-button>
+						</div>
+						<div ng-show="progress == 'submit'">
+							<md-progress-circular md-mode="indeterminate"></md-progress-circular>
+						</div>
+					</div>
+				</div>
+			</form>
+			
+		</md-card-content>
+	</md-card>
+	
+	<md-card ng-if="(progress != 'submit') && result">
+		<md-card-content layout="column">
+			<div>
+				{{result.length}} intents processed.
+				<md-button ng-disabled="!result" ng-csv="result" filename="result.csv" class="md-raised" aria-label="Download">
+					<md-icon md-font-library="material-icons">&#xE2C4;</md-icon>
+					Download .CSV
+				</md-button>
+			</div>
+			<div ui-grid="gridOptions" class="gridStyle" />
+		</md-card-content>
+	</md-card>
+	
+</div>

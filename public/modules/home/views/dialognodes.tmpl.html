@@ -1,0 +1,17 @@
+<md-dialog>
+	<md-dialog-content layout="row" layout-fill>
+		<md-list>
+			<md-list-item class="md-2-line" ng-repeat="item in dialog_nodes" ng-click="selectDialogNode(item)">
+				<div class="md-list-item-text" layout="column">
+					<h3>{{ item.dialog_node }}</h3>
+					<h4 ng-if="item.conditions">Condition: {{ item.conditions }} </h4>
+					<h4 ng-if="!item.conditions && item.dialog_node != 'root'"><i>Condition: <i>No condition yet</i></h4>
+				</div>
+				<md-divider ng-if="!$last"></md-divider>
+			</md-list-item>
+		</md-list>	
+	</md-dialog-content>
+	<md-dialog-actions>
+		<md-button ng-click="close()" class="md-primary md-raised">Close</md-button>
+	</md-dialog-actions>
+</md-dialog>
