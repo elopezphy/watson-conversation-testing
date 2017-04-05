@@ -39,61 +39,72 @@ exports.processCSV = function(credentials, inputdata, options, callback){
 	var workspace = credentials.workspace_id;
 	var promises = [];
 	
-	csv.parse(inputdata, {}, function(err, rows) {
-		if(err){
-			return callback(err, null);
-		}
-		else if(rows.length <= 0){
-			return callback("fallo", null);
+	//Calling Get Workspace to test if credentials are correct
+	conversation.getWorkspace({'workspace_id' : workspace}, function(err_aux, data_aux){
+		if (err_aux){
+			callback(err_aux, null);
 		}
 		else{
-			for (var i in rows){
-				if (rows[i].length <= 0) continue;
-				const question = rows[i][0];
-				var promise = new Promise(function(resolve, reject) {
-					let payload = {
-						workspace_id : workspace,
-						input : { text : question },
-						context : JSON.parse(options.initialcontext)
-					}
-					payload.context.system = { dialog_stack: [ { dialog_node: options.initialnode } ] }
-					
-					let answer = {
-						sentence : question
-					}
-					
-					conversation.message(payload, function(err, data) {
-						console.log(JSON.stringify(data.output))
-						if (err){
-							console.log("err: " + JSON.stringify(err))
-							resolve(answer);
-						}
-						else{
-							if ("intents" in data && data.intents.length > 0){
-								if (options.showIntent) answer.intent = data.intents[0].intent;
-								if (options.showConfidence) answer.confidence = data.intents[0].confidence;
+			csv.parse(inputdata, {}, function(err, rows) {
+				if(err){
+					return callback(err, null);
+				}
+				else if(rows.length <= 0){
+					return callback("fallo", null);
+				}
+				else{
+					for (var i in rows){
+						if (rows[i].length <= 0) continue;
+						const question = rows[i][0];
+						var promise = new Promise(function(resolve, reject) {
+							let payload = {
+								workspace_id : workspace,
+								input : { text : question },
+								context : JSON.parse(options.initialcontext)
 							}
-							if (options.showOutput && "output" in data && "text" in data.output){
-								if (data.output.text.length <= 0) answer.output = "";
-								else answer.output = data.output.text.join(" ");
+							payload.context.system = { dialog_stack: [ { dialog_node: options.initialnode } ] }
+							
+							let answer = {
+								sentence : question
 							}
-							if (options.showContext && "context" in data){
-								for (let i in options.context){
-									if (options.context[i] != "" && options.context[i] in data.context){
-										answer[options.context[i]] = data.context[options.context[i]]
-									}
+							
+							conversation.message(payload, function(err, data) {
+								console.log(JSON.stringify(data.output))
+								if (err){
+									console.log("err: " + JSON.stringify(err))
+									resolve(answer);
 								}
-							}
-							resolve(answer);
-						}
+								else{
+									if ("intents" in data && data.intents.length > 0){
+										if (options.showIntent) answer.intent = data.intents[0].intent;
+										if (options.showConfidence) answer.confidence = data.intents[0].confidence;
+									}
+									if (options.showOutput && "output" in data && "text" in data.output){
+										if (data.output.text.length <= 0) answer.output = "";
+										else answer.output = data.output.text.join(" ");
+									}
+									if (options.showContext && "context" in data){
+										for (let i in options.context){
+											if (options.context[i] != "" && options.context[i] in data.context){
+												answer[options.context[i]] = data.context[options.context[i]]
+											}
+										}
+									}
+									resolve(answer);
+								}
+							});
+						})
+						promises.push(promise);
+					}
+					Promise.all(promises).then(function(data){
+						return callback(null, data);
 					});
-				})
-				promises.push(promise);
-			}
-			Promise.all(promises).then(function(data){
-				return callback(null, data);
-			});
+				}
+			});			
 		}
-    });
+	});
+	
+	
+	
 	
 };
