@@ -16,7 +16,6 @@ app.controller('HomeController', ['$scope', '$mdDialog', 'ProjectService', 'sock
 				if (oldSelectionEnd > oldSelectionStart){ //If selection, select full lines
 					let lines_before = this.value.slice(0, oldSelectionStart).split('\n').length - 1;
 					let lines_selection = this.value.slice(oldSelectionStart, oldSelectionEnd).split('\n').length;
-					console.log(lines_before + " " + lines_selection)
 					oldSelectionStart = this.value.split('\n').slice(0, lines_before).join('\n').length
 					oldSelectionEnd = this.value.split('\n').slice(0, lines_before + lines_selection).join('\n').length
 					selection = this.value.slice(oldSelectionStart, oldSelectionEnd);
@@ -90,15 +89,17 @@ app.controller('HomeController', ['$scope', '$mdDialog', 'ProjectService', 'sock
 	$scope.result;
 	
 	function errorHandler(err){
-		var newerr = null;
-		if (err.error == "URL workspaceid parameter is not a valid GUID."){
-			newerr = "Wrong Workspace ID";
-		}
-		else if (err.error == "Not Authorized"){
-			newerr = "Invalid Credentials";
-		}
-		else{
-			newerr = "An unknown error has ocurred. Please try again later."
+		var newerr = "An unknown error has ocurred. Please try again later.";
+		if ("error" in err){
+			if (err.error == "URL workspaceid parameter is not a valid GUID."){
+				newerr = "Wrong Workspace ID";
+			}
+			else if (err.error == "Not Authorized"){
+				newerr = "Invalid Credentials";
+			}
+			else if (err.error == "CSV file is empty"){
+				newerr = err.error;
+			}
 		}
 		$scope.$apply(function(){
 			$scope.error = newerr;

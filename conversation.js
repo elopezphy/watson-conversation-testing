@@ -40,9 +40,9 @@ exports.processCSV = function(credentials, inputdata, options, callback){
 	var promises = [];
 	
 	//Calling Get Workspace to test if credentials are correct
-	conversation.getWorkspace({'workspace_id' : workspace}, function(err_aux, data_aux){
-		if (err_aux){
-			callback(err_aux, null);
+	conversation.getWorkspace({'workspace_id' : workspace}, function(err1, aux){
+		if (err1){
+			callback(err1, null);
 		}
 		else{
 			csv.parse(inputdata, {}, function(err, rows) {
@@ -50,10 +50,10 @@ exports.processCSV = function(credentials, inputdata, options, callback){
 					return callback(err, null);
 				}
 				else if(rows.length <= 0){
-					return callback("fallo", null);
+					return callback( {'error' : "CSV file is empty"} , null);
 				}
 				else{
-					for (var i in rows){
+					for (let i in rows){
 						if (rows[i].length <= 0) continue;
 						const question = rows[i][0];
 						var promise = new Promise(function(resolve, reject) {
@@ -69,9 +69,8 @@ exports.processCSV = function(credentials, inputdata, options, callback){
 							}
 							
 							conversation.message(payload, function(err, data) {
-								console.log(JSON.stringify(data.output))
 								if (err){
-									console.log("err: " + JSON.stringify(err))
+									//console.log("err: " + JSON.stringify(err))
 									resolve(answer);
 								}
 								else{
